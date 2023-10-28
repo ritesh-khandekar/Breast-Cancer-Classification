@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breast Cancer Prediction Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Custom CSS for grid layout and input field styling */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 columns, adjust as needed */
+            gap: 1rem; /* Adjust the gap between cells */
+        }
+
+        .input-field {
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+        }
+
+        .result-message {
+            margin-top: 1rem;
+            font-size: 1.25rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-blue-200 to-blue-500 p-4">
+    <div style="max-width: 900px;" class="mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-semibold mb-4 text-center">Breast Cancer Prediction</h1>
+        <form id="cancerPredictionForm">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-3">
+                {% for column_name, value in common_values.items %}
+                <div class="flex justify-between">
+                    <label for="{{ column_name }}" class="block grow text-lg py-2 font-medium text-gray-700">{{ column_name }}</label>
+                    <input type="number" name="{{ column_name }}" id="{{ column_name }}" class="input-field mt-1" placeholder="Enter {{ column_name }}" min="0" step="0.001" value="{{ value }}">
+                </div>
+                {% endfor %}
+            </div>
+            <div class="mt-6">
+                <button type="button" id="predictButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Predict</button>
+            </div>
+        </form>
+        <div id="predictionResult" class="result-message hidden mt-4">
+            Prediction: <span id="resultText" class="font-semibold text-lg"></span>
+        </div>
+    </div>
+    
+    <script>
+        const predictButton = document.getElementById('predictButton');
+        const predictionResult = document.getElementById('predictionResult');
+        const resultText = document.getElementById('resultText');
+        
+        predictButton.addEventListener('click', () => {
+            const form = document.getElementById('cancerPredictionForm');
+            const formData = {
+            //     features: {
+            //         'mean radius': '17.990000',
+            //         'mean texture': '10.380000',
+            //         'mean perimeter': '122.800000',
+            //         'mean area': '1001.000000',
+            //         'mean smoothness': '0.118400',
+            //         'mean compactness': '0.277600',
+            //         'mean concavity': '0.300100',
+            //         'mean concave points': '0.147100',
+            //         'mean symmetry': '0.241900',
+            //         'mean fractal dimension': '0.078710',
+            //         'radius error': '1.095000',
+            //         'texture error': '0.905300',
+            //         'perimeter error': '8.589000',
+            //         'area error': '153.400000',
+            //         'smoothness error': '0.006399',
+            //         'compactness error': '0.049040',
+            //         'concavity error': '0.053730',
+            //         'concave points error': '0.015870',
+            //         'symmetry error': '0.030030',
+            //         'fractal dimension error': '0.006193',
+            //         'worst radius': '25.380000',
+            //         'worst texture': '17.330000',
+            //         'worst perimeter': '184.600000',
+            //         'worst area': '2019.000000',
+            //         'worst smoothness': '0.162200',
+            //         'worst compactness': '0.665600',
+            //         'worst concavity': '0.711900',
+            //         'worst concave points': '0.265400',
+            //         'worst symmetry': '0.460100',
+            //         'worst fractal dimension': '0.118900',
+            //     }
+                features: {}
+            };
+            
+            // Collect input values
+            {% for column_name, value in common_values.items %}
+                formData["features"]["{{ column_name }}"] = parseFloat(document.getElementById("{{ column_name }}").value);
+            {% endfor %}
+            
+            fetch('./predict/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(formData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                predictionResult.classList.remove('hidden');
+                resultText.textContent = data.prediction === 1 ? 'Malignant' : 'Benign';
+                resultText.classList.add(data.prediction === 1 ? 'text-red-500' : 'text-green-500');
+            })
+            .catch(error => {
+                predictionResult.classList.remove('hidden');
+                resultText.textContent = 'Prediction failed. Please try again.';
+            });
+        });
+    </script>
+</body>
+</html>
