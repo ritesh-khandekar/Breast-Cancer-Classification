@@ -28,5 +28,5 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
-
+        cd classifier
         python manage.py test
