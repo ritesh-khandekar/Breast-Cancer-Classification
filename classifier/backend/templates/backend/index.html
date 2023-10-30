@@ -119,8 +119,8 @@
             })
             .then(data => {
                 predictionResult.classList.remove('hidden');
-                resultText.textContent = data.prediction === 1 ? 'Malignant' : 'Benign';
-                resultText.classList.add(data.prediction === 1 ? 'text-red-500' : 'text-green-500');
+                resultText.textContent = data.prediction === 0 ? 'Malignant' : 'Benign';
+                resultText.classList = data.prediction === 0 ? ['text-red-500'] : ['text-green-500'];
             })
             .catch(error => {
                 predictionResult.classList.remove('hidden');

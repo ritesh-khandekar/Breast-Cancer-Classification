@@ -92,6 +92,8 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+tmp
+appmap.yml
 
 # Gatsby files
 .cache/
